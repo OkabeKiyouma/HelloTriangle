@@ -6,6 +6,8 @@
 #include<stb_image.h>
 
 #include<iostream>
+#include<fstream>
+#include<sstream>
 
 #define SCREEN_WIDTH 1200
 //#define SCREEN_HEIGHT ((SCREEN_WIDTH)*9/16)
@@ -24,11 +26,11 @@ float texture[] = { //for textures coordinates // can be merges with vertices ar
 	0.5f,  1.f,
 };
 
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
 
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
@@ -42,6 +44,29 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
+unsigned int compile_shader(const char* filename, GLenum type) {
+	std::string tmp;
+	std::ifstream infile;
+	std::stringstream tmpstream;
+	infile.open(filename);
+	tmpstream << infile.rdbuf();
+	infile.close();
+	int success;
+
+	unsigned int sh = glCreateShader(type);
+	tmp = tmpstream.str();
+	const char* const a = tmp.c_str();
+	glShaderSource(sh, 1, &a, NULL);
+	glCompileShader(sh);
+	glGetShaderiv(sh, GL_COMPILE_STATUS, &success);
+	if (success == GL_FALSE) {
+		printf("ERROR: Compilation failed for %s\n", filename);
+		char infolog[1024];
+		glGetShaderInfoLog(sh, 1024, NULL, infolog);
+		printf("%s\n", infolog);
+	}
+	return sh;
+}
 
 int main(int argc, char** argv) {
 
@@ -147,37 +172,11 @@ int main(int argc, char** argv) {
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	GLuint vshaderid;
-	vshaderid = glCreateShader(GL_VERTEX_SHADER);
+	vshaderid = compile_shader("shader/vertexshader.glsl",GL_VERTEX_SHADER);
 	GLuint fshaderid;
-	fshaderid = glCreateShader(GL_FRAGMENT_SHADER);
+	fshaderid = compile_shader("shader/fragmentshader.glsl", GL_FRAGMENT_SHADER);
 
-	const char* vertexShaderSource =
-	#include "shader/vertex.shader";
-
-	glShaderSource(vshaderid, 1, &vertexShaderSource, NULL);
-	glCompileShader(vshaderid);
-	GLint success;
-	glGetShaderiv(vshaderid, GL_COMPILE_STATUS, &success);
-	if (success == GL_FALSE) {
-		printf("ERROR: Compilation failed at %d\n", __LINE__);
-		char infolog[1024];
-		glGetShaderInfoLog(vshaderid, 1024, NULL, infolog);
-		printf("%s\n", infolog);
-	}
-
-	const char* fragmentShaderSource =
-	#include "shader/fragment.shader";
-
-	glShaderSource(fshaderid, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fshaderid);
-	glGetShaderiv(fshaderid, GL_COMPILE_STATUS, &success);
-	if (success == GL_FALSE) {
-		printf("ERROR: Compilation failed at %d\n", __LINE__);
-		char infolog[1024];
-		glGetShaderInfoLog(fshaderid, 1024, NULL, infolog);
-		printf("%s\n", infolog);
-	}
-
+	int success;
 	GLuint shaderProgram = glCreateProgram();
 	glAttachShader(shaderProgram, vshaderid);
 	glAttachShader(shaderProgram, fshaderid);
