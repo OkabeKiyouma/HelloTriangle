@@ -22,7 +22,13 @@ float buffer[] = {
 	//positions			  //color			   //texture cordinates
 	0.f,   0.f,   0.5f,	  1.f,   0.f,   0.f,   0.0f,   0.0f,   0.5f,
 	1.f,   0.f,    1.f,	  0.f,   1.f,   0.f,    1.f,    0.f,    1.f,
+	1.f,   1.f,    1.f,	  0.f,   1.f,   0.f,    1.f,    1.f,    1.f,
 	0.f,   1.f,  0.75f,	  0.f,   0.f,   1.f,    0.f,    1.f,   0.5f
+};
+
+unsigned int element[] = {
+	0,	1,	2,
+	0,	2,	3
 };
 
 static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
@@ -118,9 +124,14 @@ int main(int argc, char** argv) {
 
 	//Vertex Buffer Object (VBO) 
 	GLuint bufferid;
-	glGenBuffers(1, &bufferid);
+	glGenBuffers(1, &bufferid);	
 	glBindBuffer(GL_ARRAY_BUFFER, bufferid);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(buffer), buffer, GL_DYNAMIC_DRAW); 
+
+	GLuint elementid;
+	glGenBuffers(1, &elementid);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementid);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(element), element, GL_STATIC_DRAW);
 
 	int theight, twidth, theight1, twidth1, tcomp1, tcomp; //for image loading
 	stbi_set_flip_vertically_on_load(1);
@@ -224,8 +235,11 @@ int main(int argc, char** argv) {
 
 		glClearColor(1.f, 1.f, 1.f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		glDrawArrays(GL_TRIANGLES, 0, 3); //GL_LINE_LOOP, GL_LINES, GL_LINE_STRIP, GL_TRIANGLE_STRIP
+		//glDrawArrays(GL_TRIANGLES, 0, 3); //GL_LINE_LOOP, GL_LINES, GL_LINE_STRIP, GL_TRIANGLE_STRIP
 										  //GL_TRIANGLE_FAN,
+		glBindVertexArray(vaoid);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementid);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glfwSwapBuffers(window);
 	}
 	glDeleteTextures(1, &textureid);
