@@ -18,16 +18,11 @@
 #define SCREEN_HEIGHT 1200
 
 
-float vertices[] = {
-	0.f, 0.f,  0.5f,
-	1.f, 0.f,   1.f,
-	0.f, 1.f, 0.75f
-
-};
-float texture[] = { //for textures coordinates // can be merges with vertices array
-	0.5f, 0.5f, 
-	 1.f, 0.5f, 
-	0.5f,  1.f,
+float buffer[] = {
+	//positions			  //color			   //texture cordinates
+	0.f,   0.f,   0.5f,	  1.f,   0.f,   0.f,   0.0f,   0.0f,   0.5f,
+	1.f,   0.f,    1.f,	  0.f,   1.f,   0.f,    1.f,    0.f,    1.f,
+	0.f,   1.f,  0.75f,	  0.f,   0.f,   1.f,    0.f,    1.f,   0.5f
 };
 
 static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods){
@@ -125,11 +120,7 @@ int main(int argc, char** argv) {
 	GLuint bufferid;
 	glGenBuffers(1, &bufferid);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferid);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + sizeof(texture), NULL, GL_DYNAMIC_DRAW); //total size of buffer with null passed as data
-
-	//Only one buffer can be bound to a context at a time, so to have multiple data we used buffersubdata and work accordingly
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); //setting 1st data from offset 0
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices), sizeof(texture), texture); //setting 2nd data from offset equal to size of first data
+	glBufferData(GL_ARRAY_BUFFER, sizeof(buffer), buffer, GL_DYNAMIC_DRAW); 
 
 	int theight, twidth, theight1, twidth1, tcomp1, tcomp; //for image loading
 	stbi_set_flip_vertically_on_load(1);
@@ -144,7 +135,7 @@ int main(int argc, char** argv) {
 
 	GLuint textureid;
 	glGenTextures(1, &textureid);
-	glActiveTexture(GL_TEXTURE0 + 2);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureid);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -197,40 +188,48 @@ int main(int argc, char** argv) {
 	glDeleteShader(vshaderid);
 	glDeleteShader(fshaderid);
 
-	glUniform1i(glGetUniformLocation(shaderProgram, "tsamp"), 2);
+	glUniform1i(glGetUniformLocation(shaderProgram, "tsamp1"), 0);
+	glUniform1i(glGetUniformLocation(shaderProgram, "tsamp2"), 1);
 
 	glVertexAttribPointer(
 		0,  //layout location of vertex in vshader eg layout (location = 0) 
 		3, //number of data to be processed consecutively for a vertex attribute, here vec3(x,y,z) coordinates needs to be loaded, hence 3
 		GL_FLOAT, // type of data to be processed
 		GL_FALSE, //set true to normalize from -1 to 1
-		3 * sizeof(float), //stride i.e difference between two consecutive vertex data
+		9 * sizeof(float), //stride i.e difference between two consecutive vertex data
 		(void*)0 //offset of buffer in this case, its start from beginning
 	);
 	glVertexAttribPointer(
 		1,  //layout location of vertex in vshader eg layout (location = 0) 
+		3, //number of data to be processed consecutively for a vertex attribute, here vec3(x,y,z) coordinates needs to be loaded, hence 3
+		GL_FLOAT, // type of data to be processed
+		GL_FALSE, //set true to normalize from -1 to 1
+		9 * sizeof(float), //stride i.e difference between two consecutive vertex data
+		(void*)(3 * sizeof(float)) //offset of buffer in this case, its start from beginning
+	);
+	glVertexAttribPointer(
+		2,  //layout location of vertex in vshader eg layout (location = 0) 
 		2, //number of data to be processed consecutively for a vertex attribute, here vec3(x,y,z) coordinates needs to be loaded, hence 3
 		GL_FLOAT, // type of data to be processed
 		GL_FALSE, //set true to normalize from -1 to 1
-		2 * sizeof(float), //stride i.e difference between two consecutive vertex data
-		(void*)(9 * sizeof(float)) //offset of buffer in this case, its start from beginning
+		9 * sizeof(float), //stride i.e difference between two consecutive vertex data
+		(void*)(6 * sizeof(float)) //offset of buffer in this case, its start from beginning
 	);
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 
 		glClearColor(1.f, 1.f, 1.f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		GLint uniform_time = glGetUniformLocation(shaderProgram, "time");
-		float time = glfwGetTime();
-		glUniform1f(uniform_time, time);
 		glDrawArrays(GL_TRIANGLES, 0, 3); //GL_LINE_LOOP, GL_LINES, GL_LINE_STRIP, GL_TRIANGLE_STRIP
 										  //GL_TRIANGLE_FAN,
 		glfwSwapBuffers(window);
 	}
 	glDeleteTextures(1, &textureid);
+	glDeleteTextures(1, &textureid2);
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	//// define the function's prototype
