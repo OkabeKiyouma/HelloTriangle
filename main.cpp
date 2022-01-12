@@ -108,16 +108,6 @@ int main(int argc, char** argv) {
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
 	std::cout << "Maximum nr of vertex attributes supported: " << nrAttributes << std::endl;*/
 
-	/*VAO(Vertex Array Object) creation
-	 Each VBO(Vertex Buffer Object) is a block of data(buffer) loaded in GPU which has various attributes set by glVertexAttribPointer which tells GPU how to access these data.
-	 Every time draw call glDrawArrays is called, the buffer data must be bound to context and attribute should be set.
-	 This process is trivialized with the help of VAO
-	 A VBO can be bound with VAO which stores its attributes. The binding is done by simply binding array to current context.
-	 Now on each draw call, simply binding VAO and VBO suffices.
-	 On that note, multiple VAO can be bound to different VBO and used in unision whenever required.
-	 Same VBO can be bound to multiple VAO.
-	 */
-	
 	GLuint vaoid; //vertex array object
 	glGenVertexArrays(1, &vaoid);
 	glBindVertexArray(vaoid);
@@ -210,22 +200,9 @@ int main(int argc, char** argv) {
 		9 * sizeof(float), //stride i.e difference between two consecutive vertex data
 		(void*)0 //offset of buffer in this case, its start from beginning
 	);
-	glVertexAttribPointer(
-		1,  //layout location of vertex in vshader eg layout (location = 0) 
-		3, //number of data to be processed consecutively for a vertex attribute, here vec3(x,y,z) coordinates needs to be loaded, hence 3
-		GL_FLOAT, // type of data to be processed
-		GL_FALSE, //set true to normalize from -1 to 1
-		9 * sizeof(float), //stride i.e difference between two consecutive vertex data
-		(void*)(3 * sizeof(float)) //offset of buffer in this case, its start from beginning
-	);
-	glVertexAttribPointer(
-		2,  //layout location of vertex in vshader eg layout (location = 0) 
-		2, //number of data to be processed consecutively for a vertex attribute, here vec3(x,y,z) coordinates needs to be loaded, hence 3
-		GL_FLOAT, // type of data to be processed
-		GL_FALSE, //set true to normalize from -1 to 1
-		9 * sizeof(float), //stride i.e difference between two consecutive vertex data
-		(void*)(6 * sizeof(float)) //offset of buffer in this case, its start from beginning
-	);
+	glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)) );
+	glVertexAttribPointer( 2 , 2 , GL_FLOAT , GL_FALSE , 9 * sizeof(float), (void*)(6 * sizeof(float)) );
+	
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
@@ -246,6 +223,9 @@ int main(int argc, char** argv) {
 	glDeleteTextures(1, &textureid2);
 	glfwDestroyWindow(window);
 	glfwTerminate();
+}
+
+	////loading opengl function manually
 	//// define the function's prototype
 	//typedef void (*GL_GENBUFFERS) (GLsizei, GLuint*);
 	//// find the function and assign it to a function pointer
@@ -253,5 +233,3 @@ int main(int argc, char** argv) {
 	//// function can now be called as normal
 	//unsigned int buffer;
 	//glGenBuffers(1, &buffer);
-
-}
