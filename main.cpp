@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
 	GLuint bufferid;
 	glGenBuffers(1, &bufferid);	
 	glBindBuffer(GL_ARRAY_BUFFER, bufferid);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(buffer), buffer, GL_DYNAMIC_DRAW); 
+	glBufferData(GL_ARRAY_BUFFER, sizeof(buffer), buffer, GL_STATIC_DRAW); 
 
 	GLuint elementid;
 	glGenBuffers(1, &elementid);
